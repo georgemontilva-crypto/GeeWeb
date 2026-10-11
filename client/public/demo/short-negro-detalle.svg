@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="200 160 400 500" width="800" height="1000">
+<defs>
+<filter id="b6" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+<filter id="b14" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="16"/></filter>
+<filter id="gs" x="-40%" y="-200%" width="180%" height="500%"><feGaussianBlur stdDeviation="22"/></filter>
+<linearGradient id="v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.16"/><stop offset=".38" stop-color="#fff" stop-opacity="0"/><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.26"/></linearGradient>
+<linearGradient id="h" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity="0.26"/><stop offset=".22" stop-color="#000" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity="0.11199999999999999"/><stop offset=".78" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.26"/></linearGradient>
+<clipPath id="c"><path d="M262,280 L538,280 Q550,280 552,294 L610,690 Q612,710 592,712 L432,720 Q416,720 414,704 L400,520 L386,704 Q384,720 368,720 L208,712 Q188,710 190,690 L248,294 Q250,280 262,280 Z"/></clipPath>
+</defs>
+<ellipse cx="400" cy="830" rx="280" ry="22" fill="#000" opacity=".22" filter="url(#gs)"/>
+<g transform="translate(400 500) scale(1.3) translate(-400 -500)">
+
+<path d="M262,280 L538,280 Q550,280 552,294 L610,690 Q612,710 592,712 L432,720 Q416,720 414,704 L400,520 L386,704 Q384,720 368,720 L208,712 Q188,710 190,690 L248,294 Q250,280 262,280 Z" fill="#1c1c1e"/>
+<g clip-path="url(#c)">
+<rect width="800" height="1000" fill="url(#v)"/>
+<rect width="800" height="1000" fill="url(#h)"/>
+<path d="M400,520 Q376,560 340,590" fill="none" stroke="#000" stroke-opacity="0.13" stroke-width="18" stroke-linecap="round" filter="url(#b6)"/><path d="M400,520 Q424,560 460,590" fill="none" stroke="#000" stroke-opacity="0.13" stroke-width="18" stroke-linecap="round" filter="url(#b6)"/><path d="M300,340 Q290,500 284,700" fill="none" stroke="#fff" stroke-opacity="0.1" stroke-width="14" stroke-linecap="round" filter="url(#b6)"/><path d="M500,340 Q510,500 516,700" fill="none" stroke="#fff" stroke-opacity="0.1" stroke-width="14" stroke-linecap="round" filter="url(#b6)"/><path d="M250,326 L550,326" fill="none" stroke="#3e3e43" stroke-width="1.6" stroke-opacity="0.55" stroke-linecap="round"/><path d="M252,282 L252,324 M260,282 L260,324 M268,282 L268,324 M276,282 L276,324 M284,282 L284,324 M292,282 L292,324 M300,282 L300,324 M308,282 L308,324 M316,282 L316,324 M324,282 L324,324 M332,282 L332,324 M340,282 L340,324 M348,282 L348,324 M356,282 L356,324 M364,282 L364,324 M372,282 L372,324 M380,282 L380,324 M388,282 L388,324 M396,282 L396,324 M404,282 L404,324 M412,282 L412,324 M420,282 L420,324 M428,282 L428,324 M436,282 L436,324 M444,282 L444,324 M452,282 L452,324 M460,282 L460,324 M468,282 L468,324 M476,282 L476,324 M484,282 L484,324 M492,282 L492,324 M500,282 L500,324 M508,282 L508,324 M516,282 L516,324 M524,282 L524,324 M532,282 L532,324 M540,282 L540,324 M548,282 L548,324 " fill="none" stroke="#3e3e43" stroke-width="1.2" stroke-opacity="0.5" stroke-linecap="round"/><path d="M400,326 L400,520" fill="none" stroke="#3e3e43" stroke-width="1.5" stroke-opacity="0.5" stroke-linecap="round"/><path d="M258,336 Q288,410 248,440" fill="none" stroke="#3e3e43" stroke-width="1.8" stroke-opacity="0.6" stroke-linecap="round"/><path d="M542,336 Q512,410 552,440" fill="none" stroke="#3e3e43" stroke-width="1.8" stroke-opacity="0.6" stroke-linecap="round"/><path d="M196,692 L384,702" fill="none" stroke="#3e3e43" stroke-width="1.6" stroke-opacity="0.55" stroke-linecap="round" stroke-dasharray="2 5"/><path d="M604,692 L416,702" fill="none" stroke="#3e3e43" stroke-width="1.6" stroke-opacity="0.55" stroke-linecap="round" stroke-dasharray="2 5"/>
+</g>
+<path d="M262,280 L538,280 Q550,280 552,294 L610,690 Q612,710 592,712 L432,720 Q416,720 414,704 L400,520 L386,704 Q384,720 368,720 L208,712 Q188,710 190,690 L248,294 Q250,280 262,280 Z" fill="none" stroke="#060606" stroke-width="1.6"/>
+<path d="M386,306 Q380,350 374,384" fill="none" stroke="#f2f2f2" stroke-width="4.5" stroke-linecap="round"/><path d="M414,306 Q420,356 428,396" fill="none" stroke="#f2f2f2" stroke-width="4.5" stroke-linecap="round"/>
+</g>
+</svg>
