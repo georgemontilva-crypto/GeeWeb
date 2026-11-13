@@ -4,195 +4,7 @@ import { DEFAULT_SETTINGS, slugify, type Block, type ProductColor } from "../sha
 import { db, schema } from "./db";
 import { env } from "./env";
 import { saveSettings } from "./settings";
-
-const C: Record<string, ProductColor> = {
-  negro: { name: "Negro", hex: "#1c1c1e" },
-  blanco: { name: "Blanco", hex: "#fbfbfb" },
-  hueso: { name: "Hueso", hex: "#ece6da" },
-  gris: { name: "Gris", hex: "#a5a7ab" },
-  arena: { name: "Arena", hex: "#cdbb9f" },
-  oliva: { name: "Oliva", hex: "#6f7658" },
-  noche: { name: "Azul noche", hex: "#26314a" },
-  cobalto: { name: "Cobalto", hex: "#2a4fd6" },
-  vino: { name: "Vino", hex: "#6b2836" },
-  cielo: { name: "Cielo", hex: "#b3c8e2" },
-  lila: { name: "Lila", hex: "#b9aadb" },
-  grafito: { name: "Grafito", hex: "#4a4b50" },
-};
-
-const ROPA = ["XS", "S", "M", "L", "XL"];
-const CINTURA = ["28", "30", "32", "34", "36"];
-
-type DemoProduct = {
-  file: string;
-  name: string;
-  tagline: string;
-  category: string;
-  price: number;
-  compareAt?: number;
-  colors: string[];
-  sizes: string[];
-  featured?: boolean;
-  isNew?: boolean;
-  description: string;
-  details: string;
-};
-
-const CATEGORIES = [
-  { name: "Camisetas", description: "Algodón pesado, cuello firme y cortes que no se deforman." },
-  { name: "Buzos y hoodies", description: "Felpa perchada por dentro, lisa por fuera." },
-  { name: "Camisas y chaquetas", description: "Las capas que terminan el conjunto." },
-  { name: "Pantalones", description: "Rectos, cómodos y con caída." },
-  { name: "Vestidos", description: "Una sola pieza, listo." },
-  { name: "Accesorios", description: "Lo que acompaña todos los días." },
-];
-
-const DETAILS_KNIT =
-  "Algodón peinado 100 %\nTela prelavada: no encoge\nCosturas reforzadas en hombros y cuello\nLavar con agua fría, secar a la sombra";
-
-const PRODUCTS: DemoProduct[] = [
-  {
-    file: "hoodie",
-    name: "Hoodie Peso Pesado",
-    tagline: "480 g de felpa. Se nota al ponértelo.",
-    category: "Buzos y hoodies",
-    price: 8900,
-    colors: ["cobalto", "negro", "gris", "hueso"],
-    sizes: ROPA,
-    featured: true,
-    isNew: true,
-    description:
-      "Nuestro hoodie más denso. Felpa de 480 g perchada por dentro, capucha de doble capa que mantiene la forma y un bolsillo canguro con refuerzo en las esquinas. El corte es recto y un poco amplio, pensado para llevarlo solo o encima de una camiseta.",
-    details: "Felpa de algodón 480 g/m²\nCapucha de doble capa con cordón plano\nPuños y cintura en rib 2×2\nCorte recto, hombro caído\nLavar del revés con agua fría",
-  },
-  {
-    file: "camiseta",
-    name: "Camiseta Esencial",
-    tagline: "La que terminas usando todos los días.",
-    category: "Camisetas",
-    price: 3200,
-    colors: ["negro", "blanco", "hueso", "cobalto", "oliva"],
-    sizes: ROPA,
-    featured: true,
-    description:
-      "Algodón peinado de 220 g con el peso justo: cae bien, no se transparenta y aguanta lavadas sin torcerse. Cuello en rib de 2 cm que no se da de sí.",
-    details: DETAILS_KNIT,
-  },
-  {
-    file: "bomber",
-    name: "Chaqueta Bomber",
-    tagline: "Liviana, forrada y con cierre metálico.",
-    category: "Camisas y chaquetas",
-    price: 12900,
-    compareAt: 14900,
-    colors: ["oliva", "negro", "noche"],
-    sizes: ROPA,
-    featured: true,
-    isNew: true,
-    description:
-      "Una bomber de corte limpio en sarga de algodón con forro liso. Cuello, puños y cintura en rib; dos bolsillos laterales y uno interior. Ideal para entretiempo.",
-    details: "Exterior: sarga de algodón\nForro: poliéster reciclado\nCierre metálico de doble carro\nDos bolsillos laterales y uno interior\nLavar en ciclo suave",
-  },
-  {
-    file: "oversize",
-    name: "Camiseta Oversize",
-    tagline: "Hombro caído, manga al codo.",
-    category: "Camisetas",
-    price: 3800,
-    colors: ["lila", "hueso", "negro", "grafito"],
-    sizes: ROPA,
-    featured: true,
-    isNew: true,
-    description:
-      "El mismo algodón de la Esencial en un patrón amplio: hombro caído, manga hasta el codo y largo recortado para que no se vea como una talla más grande.",
-    details: DETAILS_KNIT,
-  },
-  {
-    file: "pantalon",
-    name: "Pantalón Recto",
-    tagline: "Pierna recta, cintura con cordón.",
-    category: "Pantalones",
-    price: 6800,
-    colors: ["arena", "negro", "oliva"],
-    sizes: CINTURA,
-    featured: true,
-    description:
-      "Sarga suave con un toque de elastano. Cintura elástica con cordón, pierna recta y bota sin puño. Se viste igual con tenis que con zapatos.",
-    details: "Sarga 97 % algodón, 3 % elastano\nCintura elástica con cordón\nBolsillos laterales y uno trasero\nLargo estándar 78 cm de entrepierna",
-  },
-  {
-    file: "buzo",
-    name: "Buzo Cuello Redondo",
-    tagline: "El clásico, sin logos.",
-    category: "Buzos y hoodies",
-    price: 7400,
-    colors: ["gris", "noche", "arena"],
-    sizes: ROPA,
-    description:
-      "Felpa de 400 g con el triángulo de refuerzo en el cuello, como los de siempre. Corte regular, puños firmes y un interior perchado que abriga sin pesar.",
-    details: "Felpa de algodón 400 g/m²\nRefuerzo en V en el cuello\nPuños y cintura en rib\nLavar del revés con agua fría",
-  },
-  {
-    file: "camisa",
-    name: "Camisa Oxford",
-    tagline: "Abotonada, lavada, lista.",
-    category: "Camisas y chaquetas",
-    price: 5800,
-    colors: ["cielo", "blanco", "hueso"],
-    sizes: ROPA,
-    description:
-      "Oxford de algodón lavado para que se sienta suave desde el primer día. Cuello suave, bolsillo al pecho y bajo curvo para usarla por fuera.",
-    details: "Oxford 100 % algodón\nBotones de nácar reciclado\nBolsillo al pecho\nPlanchar a temperatura media",
-  },
-  {
-    file: "vestido",
-    name: "Vestido Midi",
-    tagline: "Una pieza y sales.",
-    category: "Vestidos",
-    price: 8400,
-    colors: ["vino", "negro", "hueso"],
-    sizes: ROPA,
-    isNew: true,
-    description:
-      "Vestido sin mangas en punto con cuerpo, corte en la cintura y falda con vuelo que llega a media pierna. Funciona con tenis en el día y con botas en la noche.",
-    details: "Punto 95 % viscosa, 5 % elastano\nCorte en cintura, falda en A\nLargo: media pierna\nLavar en ciclo delicado",
-  },
-  {
-    file: "short",
-    name: "Short Diario",
-    tagline: "De la casa a la calle.",
-    category: "Pantalones",
-    price: 4200,
-    colors: ["negro", "arena", "gris"],
-    sizes: ROPA,
-    description:
-      "Short en felpa liviana con cintura elástica y cordón. Largo arriba de la rodilla y bolsillos profundos.",
-    details: "Felpa liviana 280 g/m²\nCintura elástica con cordón\nBolsillos laterales\nTiro de 18 cm",
-  },
-  {
-    file: "gorra",
-    name: "Gorra Seis Paneles",
-    tagline: "Sarga lavada, ajuste metálico.",
-    category: "Accesorios",
-    price: 2800,
-    colors: ["cobalto", "negro", "hueso"],
-    sizes: [],
-    description: "Gorra de seis paneles sin estructura, en sarga lavada. Visera curva y cierre metálico ajustable.",
-    details: "Sarga 100 % algodón\nTalla única ajustable\nCierre metálico",
-  },
-  {
-    file: "tote",
-    name: "Tote de Lona",
-    tagline: "Cabe el portátil y el mercado.",
-    category: "Accesorios",
-    price: 2400,
-    colors: ["hueso", "negro"],
-    sizes: [],
-    description:
-      "Lona gruesa de 12 oz con asas largas para llevar al hombro y un bolsillo interior para llaves y celular.",
-    details: "Lona de algodón 12 oz\n38 × 42 cm, fuelle de 10 cm\nBolsillo interior",
-  },
-];
+import { DEMO_HERO, insertDemoCatalog, refreshDemoCatalog } from "./demoCatalog";
 
 const text = (title: string, body: string): Block => ({ type: "texto", title, body, align: "izquierda" });
 
@@ -320,7 +132,10 @@ export async function seed() {
   await ensureAdmin();
 
   const [done] = await db.select().from(schema.settings).where(eq(schema.settings.key, "seeded")).limit(1);
-  if (done) return;
+  if (done) {
+    if (env.seedDemo) await refreshDemoCatalog();
+    return;
+  }
 
   await saveSettings(DEFAULT_SETTINGS);
 
@@ -362,60 +177,10 @@ export async function seed() {
   }
 
   if (env.seedDemo) {
-    const catIds = new Map<string, number>();
-    for (const [i, c] of CATEGORIES.entries()) {
-      const [ins] = await db
-        .insert(schema.categories)
-        .values({ name: c.name, slug: slugify(c.name), description: c.description, sortOrder: i + 1 });
-      catIds.set(c.name, ins.insertId);
-    }
-
-    let featuredOrder = 0;
-    for (const [pi, p] of PRODUCTS.entries()) {
-      const colors = p.colors.map((k) => C[k]!);
-      const [ins] = await db.insert(schema.products).values({
-        name: p.name,
-        slug: slugify(p.name),
-        tagline: p.tagline,
-        description: p.description,
-        details: p.details,
-        price: p.price,
-        compareAtPrice: p.compareAt ?? null,
-        categoryId: catIds.get(p.category) ?? null,
-        colors: JSON.stringify(colors),
-        sizes: JSON.stringify(p.sizes),
-        isFeatured: Boolean(p.featured),
-        featuredOrder: p.featured ? ++featuredOrder : 0,
-        isNew: Boolean(p.isNew),
-      });
-      const productId = ins.insertId;
-
-      const images: (typeof schema.productImages.$inferInsert)[] = [];
-      p.colors.forEach((key, ci) => {
-        images.push({ productId, url: `/demo/${p.file}-${key}.svg`, color: C[key]!.name, sortOrder: ci * 2 });
-        images.push({ productId, url: `/demo/${p.file}-${key}-detalle.svg`, color: C[key]!.name, sortOrder: ci * 2 + 1 });
-      });
-      await db.insert(schema.productImages).values(images);
-
-      const variants: (typeof schema.productVariants.$inferInsert)[] = [];
-      colors.forEach((color, ci) => {
-        const sizes = p.sizes.length ? p.sizes : [""];
-        sizes.forEach((size, si) => {
-          // Existencias variadas, con alguna talla agotada para ver ese estado.
-          const n = (pi * 7 + ci * 5 + si * 3) % 13;
-          variants.push({
-            productId,
-            color: color.name,
-            size,
-            stock: n === 4 ? 0 : n + 2,
-            sku: [p.file, color.name, size].filter(Boolean).join("-").toUpperCase().replace(/\s+/g, ""),
-          });
-        });
-      });
-      await db.insert(schema.productVariants).values(variants);
-    }
-    console.log(`✓ Catálogo de ejemplo creado: ${PRODUCTS.length} productos.`);
+    await insertDemoCatalog();
+    await saveSettings({ ...DEFAULT_SETTINGS, home: { ...DEFAULT_SETTINGS.home, heroImageUrl: DEMO_HERO[0]!, heroImage2Url: DEMO_HERO[1]! } });
   }
+  await db.insert(schema.settings).values({ key: "demo-photos-v1", value: new Date().toISOString() });
 
   await db.insert(schema.settings).values({ key: "seeded", value: new Date().toISOString() });
 }
