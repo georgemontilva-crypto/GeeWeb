@@ -35,7 +35,7 @@ function loadForm(): Form {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="border-t border-line pt-8">
-      <h2 className="text-[24px] tracking-[-0.03em]">{title}</h2>
+      <h2 className="caps">{title}</h2>
       <div className="mt-5">{children}</div>
     </section>
   );
@@ -59,7 +59,7 @@ function OptionCard({
   return (
     <label
       className={cx(
-        "flex cursor-pointer items-center gap-4 rounded-[18px] bg-white px-5 py-4 transition-shadow duration-150",
+        "flex cursor-pointer items-center gap-4 bg-paper px-5 py-4 transition-shadow duration-150",
         selected
           ? "shadow-[0_0_0_2px_var(--color-ink)]"
           : "shadow-[0_0_0_1px_var(--color-line)] hover:shadow-[0_0_0_1.5px_var(--color-ink-3)]",
@@ -70,13 +70,13 @@ function OptionCard({
         aria-hidden
         className={cx(
           "grid size-[22px] shrink-0 place-items-center rounded-full transition-colors",
-          selected ? "bg-ink text-white" : "shadow-[inset_0_0_0_1.5px_var(--color-line)]",
+          selected ? "bg-ink text-paper" : "shadow-[inset_0_0_0_1.5px_var(--color-line)]",
         )}
       >
         {selected && <Check className="size-3.5" strokeWidth={3} />}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[16px] font-semibold tracking-[-0.02em]">{title}</span>
+        <span className="block text-[14px] font-medium">{title}</span>
         {text && <span className="block text-[14px] leading-snug text-ink-2">{text}</span>}
       </span>
       {aside && <span className="shrink-0 text-[15px] tabular-nums">{aside}</span>}
@@ -185,7 +185,7 @@ export default function Checkout() {
   }
   if (rows.length === 0 && !placed) {
     return (
-      <div className="wrap pt-[160px]">
+      <div className="wrap pt-14">
         <EmptyState title="Tu bolsa está vacía" text="Agrega algo antes de finalizar la compra.">
           <ButtonLink href="/tienda">Ir a la tienda</ButtonLink>
         </EmptyState>
@@ -194,8 +194,8 @@ export default function Checkout() {
   }
 
   return (
-    <div className="wrap pt-[116px]">
-      <h1 className="headline text-[clamp(2.4rem,6vw,4.5rem)]">Finalizar compra</h1>
+    <div className="wrap pt-14">
+      <h1 className="headline text-[clamp(1.75rem,3.4vw,2.6rem)]">Finalizar compra</h1>
 
       <form onSubmit={submit} noValidate className="mt-10 grid items-start gap-x-[5vw] gap-y-10 lg:grid-cols-[minmax(0,1fr)_440px]">
         <div className="space-y-10">
@@ -291,19 +291,19 @@ export default function Checkout() {
           </Section>
         </div>
 
-        <aside className="rounded-card bg-mist p-6 sm:p-7 lg:sticky lg:top-[84px]" aria-label="Resumen del pedido">
-          <h2 className="text-[21px] tracking-[-0.03em]">Tu pedido</h2>
-          <ul className="mt-2 divide-y divide-black/8 [&_.bg-mist]:bg-white">
+        <aside className=" border border-line p-6 sm:p-7 lg:sticky lg:top-[100px]" aria-label="Resumen del pedido">
+          <h2 className="caps">Tu pedido</h2>
+          <ul className="mt-2 divide-y divide-line ">
             {rows.map((r) => (
               <CartLineRow key={r.variantId} row={r} compact />
             ))}
           </ul>
 
-          <div className="mt-2 border-t border-black/8 pt-5">
+          <div className="mt-2 border-t border-line pt-5">
             {coupon ? (
-              <div className="flex items-center justify-between rounded-[14px] bg-white px-4 py-3 text-[15px]">
+              <div className="flex items-center justify-between bg-paper px-4 py-3 text-[15px]">
                 <span>
-                  Cupón <strong className="font-semibold">{coupon.code}</strong> aplicado
+                  Cupón <strong className="font-medium">{coupon.code}</strong> aplicado
                 </span>
                 <button
                   type="button"
@@ -330,7 +330,7 @@ export default function Checkout() {
                 />
                 <Button
                   variant="secondary"
-                  className="h-12 !bg-white"
+                  className="h-12 border border-line !bg-paper"
                   loading={applyCoupon.isPending}
                   disabled={!couponText.trim()}
                   onClick={() => applyCoupon.mutate({ code: couponText, subtotal })}
@@ -356,9 +356,9 @@ export default function Checkout() {
               <dt className="text-ink-2">Envío</dt>
               <dd className="tabular-nums">{!shipping ? "Por definir" : shippingCost === 0 ? "Gratis" : money(shippingCost)}</dd>
             </div>
-            <div className="flex items-baseline justify-between border-t border-black/8 pt-4">
-              <dt className="text-[17px] font-semibold">Total</dt>
-              <dd className="text-[26px] font-semibold tracking-[-0.03em] tabular-nums">{money(total)}</dd>
+            <div className="flex items-baseline justify-between border-t border-line pt-4">
+              <dt className="text-[17px] font-medium">Total</dt>
+              <dd className="text-[18px] tabular-nums">{money(total)}</dd>
             </div>
           </dl>
 

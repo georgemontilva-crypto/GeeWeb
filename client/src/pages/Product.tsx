@@ -1,87 +1,139 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearch } from "wouter";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, RefreshCw, ShieldCheck, Truck } from "lucide-react";
+import { X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useMoney, useShop, type ProductDetail } from "@/lib/shop";
 import { cart } from "@/lib/cart";
 import { Button, ButtonLink, EmptyState, Spinner, cx } from "@/components/ui";
-import { Price, ProductGrid, Swatch } from "@/components/ProductCard";
-import { QuantityStepper } from "@/components/CartDrawer";
+import { Price, ProductGrid } from "@/components/ProductCard";
 
 const EASE = [0.28, 0.11, 0.32, 1] as const;
-const PERK_ICONS = [Truck, RefreshCw, ShieldCheck];
-const tint = (hex: string, amount = 10) => `color-mix(in srgb, ${hex} ${amount}%, #f5f5f7)`;
 
-function Gallery({ images, alt, hex }: { images: string[]; alt: string; hex?: string }) {
+/** Fotos completas: apiladas en pantallas grandes, deslizables en el celular. */
+function Gallery({ images, alt, onOpen }: { images: string[]; alt: string; onOpen: (i: number) => void }) {
+  const rail = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
-  const [zoom, setZoom] = useState<{ x: number; y: number } | null>(null);
-  useEffect(() => setIndex(0), [images]);
-  const current = images[index] ?? images[0];
-
-  const onMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!window.matchMedia("(hover: hover)").matches) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    setZoom({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
-  };
+  useEffect(() => {
+    setIndex(0);
+    rail.current?.scrollTo({ left: 0 });
+  }, [images]);
 
   return (
-    <div>
-      <div
-        className="relative aspect-[4/5] cursor-zoom-in overflow-hidden rounded-[36px] bg-mist transition-[background-color] duration-700 ease-apple"
-        style={{ backgroundColor: hex ? tint(hex) : undefined }}
-        onMouseMove={onMove}
-        onMouseLeave={() => setZoom(null)}
-      >
-        <AnimatePresence initial={false}>
-          {current && (
-            <motion.img
-              key={current}
-              src={current}
-              alt={alt}
-              className="absolute inset-0 size-full object-cover"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: zoom ? 1.75 : 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: zoom ? 0.25 : 0.5, ease: EASE }}
-              style={{ transformOrigin: zoom ? `${zoom.x}% ${zoom.y}%` : "50% 50%" }}
-              fetchPriority="high"
-            />
-          )}
-        </AnimatePresence>
-      </div>
-      {images.length > 1 && (
-        <div className="mt-3 flex gap-3" role="group" aria-label="Fotos del producto">
+    <>
+      {/* Celular */}
+      <div className="relative lg:hidden">
+        <div
+          ref={rail}
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            setIndex(Math.round(el.scrollLeft / el.clientWidth));
+          }}
+          className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
+        >
           {images.map((url, i) => (
             <button
               key={url}
               type="button"
-              aria-label={`Ver foto ${i + 1}`}
-              aria-pressed={i === index}
-              onClick={() => setIndex(i)}
-              className={cx(
-                "h-[92px] w-[74px] overflow-hidden rounded-[18px] bg-mist transition-shadow duration-200",
-                i === index ? "shadow-[0_0_0_2px_var(--color-ink)]" : "hover:shadow-[0_0_0_2px_var(--color-line)]",
-              )}
-              style={{ backgroundColor: hex ? tint(hex) : undefined }}
+              onClick={() => onOpen(i)}
+              aria-label={`Ampliar foto ${i + 1}`}
+              className="relative aspect-[4/5] w-full shrink-0 snap-start bg-tile"
             >
-              <img src={url} alt="" className="size-full object-cover" />
+              <img src={url} alt={i === 0 ? alt : ""} className="absolute inset-0 size-full object-cover" fetchPriority={i === 0 ? "high" : "auto"} />
             </button>
           ))}
         </div>
-      )}
-    </div>
+        {images.length > 1 && (
+          <p className="caps pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 !text-[11px] tabular-nums">
+            {index + 1} / {images.length}
+          </p>
+        )}
+      </div>
+
+      {/* Escritorio */}
+      <div className={cx("hidden gap-1 lg:grid", images.length > 1 && "grid-cols-2")}>
+        {images.map((url, i) => (
+          <button
+            key={url}
+            type="button"
+            onClick={() => onOpen(i)}
+            aria-label={`Ampliar foto ${i + 1}`}
+            className={cx(
+              "relative block aspect-[4/5] cursor-zoom-in overflow-hidden bg-tile",
+              images.length > 1 && i === 0 && images.length % 2 === 1 && "col-span-2",
+            )}
+          >
+            <img src={url} alt={i === 0 ? alt : ""} className="absolute inset-0 size-full object-cover" fetchPriority={i === 0 ? "high" : "auto"} />
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function Lightbox({ images, start, onClose }: { images: string[]; start: number; onClose: () => void }) {
+  const [i, setI] = useState(start);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") setI((x) => Math.min(images.length - 1, x + 1));
+      if (e.key === "ArrowLeft") setI((x) => Math.max(0, x - 1));
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [images.length, onClose]);
+  return (
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Fotos del producto"
+      className="fixed inset-0 z-[90] flex flex-col bg-paper"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <div className="edge flex h-16 shrink-0 items-center justify-between">
+        <p className="caps tabular-nums">
+          {i + 1} / {images.length}
+        </p>
+        <button type="button" onClick={onClose} aria-label="Cerrar" className="-mr-2 grid size-10 place-items-center hover:opacity-60">
+          <X className="size-5" strokeWidth={1.2} />
+        </button>
+      </div>
+      <div className="relative min-h-0 flex-1">
+        <img src={images[i]} alt="" className="absolute inset-0 size-full object-contain" />
+        {i > 0 && (
+          <button type="button" onClick={() => setI(i - 1)} className="caps absolute inset-y-0 left-0 w-1/3 text-left pl-6 opacity-0 hover:opacity-100" aria-label="Foto anterior">
+            Anterior
+          </button>
+        )}
+        {i < images.length - 1 && (
+          <button type="button" onClick={() => setI(i + 1)} className="caps absolute inset-y-0 right-0 w-1/3 text-right pr-6 opacity-0 hover:opacity-100" aria-label="Foto siguiente">
+            Siguiente
+          </button>
+        )}
+      </div>
+    </motion.div>
   );
 }
 
 function Accordion({ title, children, open }: { title: string; children: React.ReactNode; open?: boolean }) {
   return (
     <details className="group border-t border-line" open={open}>
-      <summary className="flex list-none items-center justify-between gap-4 py-5 text-[19px] font-semibold tracking-[-0.02em] [&::-webkit-details-marker]:hidden">
+      <summary className="caps flex list-none items-center justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
         {title}
-        <ChevronDown className="size-5 shrink-0 text-ink-2 transition-transform duration-300 group-open:rotate-180" aria-hidden />
+        <span className="text-[16px] leading-none" aria-hidden>
+          <span className="group-open:hidden">+</span>
+          <span className="hidden group-open:inline">−</span>
+        </span>
       </summary>
-      <div className="pb-6 text-[16px] leading-relaxed text-ink-2">{children}</div>
+      <div className="pb-6 text-[14px] leading-relaxed text-ink-2">{children}</div>
     </details>
   );
 }
@@ -103,10 +155,10 @@ function Buy({ product }: { product: ProductDetail }) {
     const wanted = product.colors.find((c) => c.name === initialColor)?.name;
     return wanted ?? product.colors.find((c) => colorStock(c.name) > 0)?.name ?? product.colors[0]!.name;
   });
-  const [size, setSize] = useState(hasSizes ? "" : "");
-  const [qty, setQty] = useState(1);
+  const [size, setSize] = useState("");
   const [askSize, setAskSize] = useState(false);
   const [barVisible, setBarVisible] = useState(false);
+  const [zoom, setZoom] = useState<number | null>(null);
   const buyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,7 +168,6 @@ function Buy({ product }: { product: ProductDetail }) {
   // Si la talla elegida no existe en el nuevo color, se limpia la selección.
   useEffect(() => {
     if (size && stockOf(color, size) <= 0) setSize("");
-    setQty(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color]);
 
@@ -135,7 +186,6 @@ function Buy({ product }: { product: ProductDetail }) {
   const soldOut = totalStock <= 0;
   const needsSize = hasSizes && !size;
   const stock = variant?.stock ?? 0;
-  const hex = product.colors.find((c) => c.name === color)?.hex;
 
   const images = useMemo(() => {
     const mine = product.images.filter((i) => i.color === color || i.color === "");
@@ -149,7 +199,7 @@ function Buy({ product }: { product: ProductDetail }) {
       return;
     }
     if (!variant || stock <= 0) return;
-    cart.add(variant.id, Math.min(qty, stock));
+    cart.add(variant.id, 1);
   };
 
   const label = soldOut
@@ -167,216 +217,183 @@ function Buy({ product }: { product: ProductDetail }) {
 
   return (
     <>
-      <div className="grid gap-x-[5vw] gap-y-8 lg:grid-cols-[minmax(0,1.12fr)_minmax(0,1fr)]">
-        <div className="lg:sticky lg:top-[84px] lg:self-start">
-          <Gallery images={images} alt={`${product.name}${color ? ` ${color}` : ""}`} hex={hex} />
-        </div>
+      <div className="grid lg:grid-cols-[minmax(0,1.55fr)_minmax(380px,1fr)]">
+        <Gallery images={images} alt={`${product.name}${color ? ` ${color}` : ""}`} onOpen={setZoom} />
 
-        <div className="lg:py-4">
-          <nav aria-label="Ruta" className="text-[14px] text-ink-2">
-            <Link href="/tienda" className="hover:text-ink">
-              Tienda
-            </Link>
-            {product.category && (
-              <>
-                <span className="mx-2 text-ink-3">/</span>
-                <Link href={`/categoria/${product.category.slug}`} className="hover:text-ink">
-                  {product.category.name}
-                </Link>
-              </>
-            )}
-          </nav>
-
-          {product.isNew && <p className="mt-5 text-[15px] font-medium text-[#b4530a]">Nuevo</p>}
-          <h1 className="headline mt-2 text-[clamp(2.4rem,4.6vw,4rem)]">{product.name}</h1>
-          {product.tagline && <p className="mt-3 text-[19px] text-ink-2">{product.tagline}</p>}
-          <Price
-            price={product.price}
-            compareAt={product.compareAtPrice}
-            className="mt-5 text-[24px] font-semibold tracking-[-0.02em]"
-          />
-
-          {hasColors && (
-            <fieldset className="mt-9">
-              <legend className="text-[15px]">
-                <span className="text-ink-2">Color: </span>
-                <span className="font-semibold">{color}</span>
-              </legend>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.colors.map((c) => (
-                  <button
-                    key={c.name}
-                    type="button"
-                    aria-label={c.name}
-                    aria-pressed={c.name === color}
-                    title={colorStock(c.name) > 0 ? c.name : `${c.name}, agotado`}
-                    onClick={() => setColor(c.name)}
-                    className={cx(
-                      "relative rounded-full p-1 transition-shadow duration-200",
-                      c.name === color
-                        ? "shadow-[0_0_0_2px_var(--color-ink)]"
-                        : "shadow-[0_0_0_1px_var(--color-line)] hover:shadow-[0_0_0_2px_var(--color-ink-3)]",
-                    )}
-                  >
-                    <span
-                      className="block size-8 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]"
-                      style={{ background: c.hex }}
-                    />
-                    {colorStock(c.name) <= 0 && (
-                      <span className="absolute inset-0 grid place-items-center" aria-hidden>
-                        <span className="h-px w-9 rotate-45 bg-ink-2" />
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          )}
-
-          {hasSizes && (
-            <fieldset className="mt-8">
-              <div className="flex items-baseline justify-between">
-                <legend className="float-left text-[15px]">
-                  <span className="text-ink-2">Talla{size ? ": " : ""}</span>
-                  <span className="font-semibold">{size}</span>
-                </legend>
-                {sizeGuide && (
-                  <Link
-                    href={`/${sizeGuide.slug}`}
-                    className="text-[14px] text-ink-2 underline underline-offset-4 hover:text-ink"
-                  >
-                    Guía de tallas
+        <div className="edge lg:px-[clamp(32px,4vw,72px)]">
+          <div className="pb-10 pt-8 lg:sticky lg:top-[76px] lg:pt-14">
+            <nav aria-label="Ruta" className="text-[13px] text-ink-3">
+              <Link href="/tienda" className="hover:text-ink">
+                Tienda
+              </Link>
+              {product.category && (
+                <>
+                  <span className="mx-2">•</span>
+                  <Link href={`/categoria/${product.category.slug}`} className="hover:text-ink">
+                    {product.category.name}
                   </Link>
-                )}
-              </div>
-              <div className="mt-3 grid clear-both grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-2">
-                {product.sizes.map((s) => {
-                  const available = stockOf(color, s) > 0;
-                  return (
+                </>
+              )}
+            </nav>
+
+            <h1 className="caps mt-6 !text-[15px] !tracking-[0.16em]">{product.name}</h1>
+            <Price price={product.price} compareAt={product.compareAtPrice} className="mt-2 text-[15px]" />
+            {product.tagline && <p className="mt-4 max-w-[42ch] text-[14px] text-ink-2">{product.tagline}</p>}
+
+            {hasColors && (
+              <fieldset className="mt-9">
+                <legend className="text-[13px]">
+                  <span className="text-ink-3">Color </span>
+                  {color}
+                </legend>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {product.colors.map((c) => (
                     <button
-                      key={s}
+                      key={c.name}
                       type="button"
-                      disabled={!available}
-                      aria-pressed={s === size}
-                      onClick={() => {
-                        setSize(s);
-                        setAskSize(false);
-                        setQty(1);
-                      }}
+                      aria-label={c.name}
+                      aria-pressed={c.name === color}
+                      title={colorStock(c.name) > 0 ? c.name : `${c.name}, agotado`}
+                      onClick={() => setColor(c.name)}
                       className={cx(
-                        "relative h-14 overflow-hidden rounded-[16px] text-[16px] font-medium transition-[box-shadow,background-color] duration-150",
-                        s === size
-                          ? "bg-white shadow-[0_0_0_2px_var(--color-ink)]"
-                          : available
-                            ? "bg-white shadow-[0_0_0_1px_var(--color-line)] hover:shadow-[0_0_0_1.5px_var(--color-ink-3)]"
-                            : "bg-mist text-ink-3 shadow-none",
+                        "relative p-[3px] transition-shadow duration-200",
+                        c.name === color ? "shadow-[0_0_0_1px_var(--c-ink)]" : "hover:shadow-[0_0_0_1px_var(--c-line)]",
                       )}
                     >
-                      {s}
-                      {!available && (
-                        <span className="sr-only">, agotada</span>
-                      )}
-                      {!available && (
-                        <span aria-hidden className="absolute inset-0 grid place-items-center">
-                          <span className="h-px w-[130%] -rotate-[24deg] bg-line" />
+                      <span className="block size-7 shadow-[inset_0_0_0_1px_rgba(128,128,128,0.35)]" style={{ background: c.hex }} />
+                      {colorStock(c.name) <= 0 && (
+                        <span className="absolute inset-0 grid place-items-center" aria-hidden>
+                          <span className="h-px w-9 rotate-45 bg-ink-2" />
                         </span>
                       )}
                     </button>
-                  );
-                })}
-              </div>
-              {askSize && <p className="mt-2.5 text-[14px] text-bad">Elige una talla para agregarlo a la bolsa.</p>}
-            </fieldset>
-          )}
-
-          <div ref={buyRef} className="mt-9 flex items-center gap-3">
-            {!soldOut && (
-              <QuantityStepper value={qty} max={needsSize ? 20 : Math.max(1, Math.min(20, stock))} onChange={setQty} />
-            )}
-            <Button size="lg" className="flex-1" disabled={disabled} onClick={add}>
-              {label}
-            </Button>
-          </div>
-          {!needsSize && stock > 0 && stock <= 5 && (
-            <p className="mt-3 text-[14px] text-warn">
-              {stock === 1 ? "Queda la última unidad." : `Quedan solo ${stock} unidades.`}
-            </p>
-          )}
-
-          {perks.length > 0 && (
-            <ul className="mt-9 space-y-3.5 text-[15px]">
-              {perks.map((perk, i) => {
-                const Icon = PERK_ICONS[i % PERK_ICONS.length]!;
-                return (
-                  <li key={i} className="flex items-start gap-3 text-ink-2">
-                    <Icon className="mt-0.5 size-5 shrink-0 text-ink" strokeWidth={1.6} aria-hidden />
-                    <span>
-                      <span className="font-medium text-ink">{perk.title}.</span> {perk.text}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          <div className="mt-10 border-b border-line">
-            {product.description && (
-              <Accordion title="Descripción" open>
-                {product.description.split(/\n{2,}/).map((para, i) => (
-                  <p key={i} className={i ? "mt-3" : undefined}>
-                    {para}
-                  </p>
-                ))}
-              </Accordion>
-            )}
-            {details.length > 0 && (
-              <Accordion title="Materiales y cuidado">
-                <ul className="space-y-1.5">
-                  {details.map((d) => (
-                    <li key={d} className="flex gap-3">
-                      <span className="mt-[0.7em] size-1 shrink-0 rounded-full bg-ink-3" aria-hidden />
-                      {d}
-                    </li>
                   ))}
-                </ul>
-              </Accordion>
+                </div>
+              </fieldset>
             )}
-            <Accordion title="Envíos y cambios">
-              <p>Los métodos de envío, con su costo y tiempo de entrega, aparecen antes de pagar.</p>
-              {returns && (
-                <p className="mt-3">
-                  <Link href={`/${returns.slug}`} className="text-ink underline underline-offset-4">
-                    Leer la política completa
-                  </Link>
+
+            {hasSizes && (
+              <fieldset className="mt-8">
+                <div className="flex items-baseline justify-between">
+                  <legend className="float-left text-[13px]">
+                    <span className="text-ink-3">Talla </span>
+                    {size}
+                  </legend>
+                  {sizeGuide && (
+                    <Link href={`/${sizeGuide.slug}`} className="link text-[13px] text-ink-2">
+                      Guía de tallas
+                    </Link>
+                  )}
+                </div>
+                <div className="clear-both mt-3 grid grid-cols-5 gap-px border border-line bg-line">
+                  {product.sizes.map((s) => {
+                    const available = stockOf(color, s) > 0;
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        disabled={!available}
+                        aria-pressed={s === size}
+                        onClick={() => {
+                          setSize(s);
+                          setAskSize(false);
+                        }}
+                        className={cx(
+                          "h-12 text-[13px] transition-colors duration-150",
+                          s === size
+                            ? "bg-ink text-paper"
+                            : available
+                              ? "bg-paper hover:bg-mist"
+                              : "bg-paper text-ink-3 line-through decoration-1",
+                        )}
+                      >
+                        {s}
+                        {!available && <span className="sr-only">, agotada</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {askSize && <p className="mt-2.5 text-[13px] text-bad">Elige una talla para agregarlo a la bolsa.</p>}
+              </fieldset>
+            )}
+
+            <div ref={buyRef} className="mt-8">
+              <Button size="lg" className="caps h-14 w-full !text-[12px]" disabled={disabled} onClick={add}>
+                {label}
+              </Button>
+              {!needsSize && stock > 0 && stock <= 5 && (
+                <p className="mt-3 text-[13px] text-ink-2">
+                  {stock === 1 ? "Queda la última unidad." : `Quedan ${stock} unidades.`}
                 </p>
               )}
-            </Accordion>
+            </div>
+
+            <div className="mt-10 border-b border-line">
+              {product.description && (
+                <Accordion title="Descripción" open>
+                  {product.description.split(/\n{2,}/).map((para, i) => (
+                    <p key={i} className={i ? "mt-3" : undefined}>
+                      {para}
+                    </p>
+                  ))}
+                </Accordion>
+              )}
+              {details.length > 0 && (
+                <Accordion title="Materiales y cuidado">
+                  <ul className="space-y-1">
+                    {details.map((d) => (
+                      <li key={d}>{d}</li>
+                    ))}
+                  </ul>
+                </Accordion>
+              )}
+              <Accordion title="Envíos y cambios">
+                {perks.length > 0 ? (
+                  <ul className="space-y-1">
+                    {perks.map((p, i) => (
+                      <li key={i}>
+                        <span className="text-ink">{p.title}.</span> {p.text}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Los métodos de envío, con su costo y tiempo de entrega, aparecen antes de pagar.</p>
+                )}
+                {returns && (
+                  <p className="mt-3">
+                    <Link href={`/${returns.slug}`} className="link text-ink">
+                      Leer la política completa
+                    </Link>
+                  </p>
+                )}
+              </Accordion>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Barra de compra fija: aparece cuando el botón principal sale de la vista */}
+      <AnimatePresence>
+        {zoom !== null && <Lightbox images={images} start={zoom} onClose={() => setZoom(null)} />}
+      </AnimatePresence>
+
+      {/* Barra de compra fija en el celular cuando el botón sale de la vista */}
       <AnimatePresence>
         {barVisible && !soldOut && (
           <motion.div
-            className="fixed inset-x-3 bottom-3 z-40"
-            initial={{ y: 90, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 90, opacity: 0 }}
-            transition={{ duration: 0.4, ease: EASE }}
+            className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper lg:hidden"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.35, ease: EASE }}
           >
-            <div className="glass mx-auto flex max-w-[760px] items-center gap-4 rounded-full py-2 pl-3 pr-2 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_12px_40px_-12px_rgba(0,0,0,0.3)]">
-              <span className="size-11 shrink-0 overflow-hidden rounded-full bg-mist">
-                {images[0] && <img src={images[0]} alt="" className="size-full scale-[1.6] object-cover" />}
-              </span>
+            <div className="edge flex items-center gap-4 py-3">
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] font-semibold tracking-[-0.02em]">{product.name}</span>
-                <span className="block truncate text-[13px] text-ink-2">
-                  {[color, size].filter(Boolean).join(", ") || money(product.price)}
+                <span className="caps block truncate !text-[11px]">{product.name}</span>
+                <span className="block text-[13px] text-ink-2 tabular-nums">
+                  {[color, size].filter(Boolean).join(" · ") || money(product.price)}
                 </span>
               </span>
-              <span className="hidden text-[15px] tabular-nums sm:block">{money(product.price)}</span>
-              <Button disabled={disabled} onClick={add}>
+              <Button className="caps !text-[11px]" disabled={disabled} onClick={add}>
                 {needsSize ? "Elegir talla" : stock <= 0 ? "Agotado" : "Agregar"}
               </Button>
             </div>
@@ -393,14 +410,14 @@ export default function Product() {
 
   if (isLoading) {
     return (
-      <div className="grid h-dvh place-items-center">
+      <div className="grid h-[80svh] place-items-center">
         <Spinner />
       </div>
     );
   }
   if (!data) {
     return (
-      <div className="wrap pt-[160px]">
+      <div className="edge pt-24">
         <EmptyState title="Este producto ya no está disponible" text="Puede que se haya agotado o que lo hayamos retirado de la tienda.">
           <ButtonLink href="/tienda">Ver toda la tienda</ButtonLink>
         </EmptyState>
@@ -409,14 +426,14 @@ export default function Product() {
   }
 
   return (
-    <div className="wrap pt-[92px]">
+    <div>
       <Buy key={data.product.id} product={data.product} />
       {data.related.length > 0 && (
-        <section className="pt-28 sm:pt-36" aria-labelledby="relacionados">
-          <h2 id="relacionados" className="headline text-[clamp(2rem,4.4vw,3.5rem)]">
-            Combina con esto.
+        <section className="pt-24 sm:pt-32" aria-labelledby="relacionados">
+          <h2 id="relacionados" className="caps edge mb-6">
+            También te puede gustar
           </h2>
-          <div className="mt-9">
+          <div className="edge">
             <ProductGrid products={data.related} />
           </div>
         </section>

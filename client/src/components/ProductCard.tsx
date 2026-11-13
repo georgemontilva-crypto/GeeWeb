@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { Link } from "wouter";
-import { imageFor, useMoney, type ProductCard as Card } from "@/lib/shop";
+import { useMoney, type ProductCard as Card } from "@/lib/shop";
 import { cx } from "./ui";
 
 export function Price({
@@ -14,7 +13,7 @@ export function Price({
 }) {
   const money = useMoney();
   return (
-    <span className={cx("inline-flex items-baseline gap-2", className)}>
+    <span className={cx("inline-flex items-baseline gap-2 tabular-nums", className)}>
       <span>{money(price)}</span>
       {compareAt && compareAt > price ? (
         <span className="text-ink-3 line-through decoration-1">
@@ -26,6 +25,7 @@ export function Price({
   );
 }
 
+/** Muestra de color cuadrada. */
 export function Swatch({
   hex,
   name,
@@ -41,13 +41,13 @@ export function Swatch({
 }) {
   const dot = (
     <span
-      className="block rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,0.14)]"
+      className="block shadow-[inset_0_0_0_1px_rgba(128,128,128,0.35)]"
       style={{ background: hex, width: size, height: size }}
     />
   );
   const ring = cx(
-    "inline-flex rounded-full p-[3px] transition-shadow duration-200",
-    selected ? "shadow-[0_0_0_1.5px_var(--color-ink)]" : "shadow-[0_0_0_1.5px_transparent]",
+    "inline-flex p-[3px] transition-shadow duration-200",
+    selected ? "shadow-[0_0_0_1px_var(--c-ink)]" : "shadow-[0_0_0_1px_transparent]",
   );
   if (!onSelect) return <span className={ring}>{dot}</span>;
   return (
@@ -57,79 +57,69 @@ export function Swatch({
       aria-pressed={selected}
       title={name}
       onClick={onSelect}
-      onMouseEnter={onSelect}
-      className={cx(ring, !selected && "hover:shadow-[0_0_0_1.5px_var(--color-line)]")}
+      className={cx(ring, !selected && "hover:shadow-[0_0_0_1px_var(--c-line)]")}
     >
       {dot}
     </button>
   );
 }
 
-/** Tarjeta de producto del catálogo. Pasar el cursor por un color cambia la foto. */
+/** Tarjeta del catálogo: foto completa y, al pasar el cursor, la segunda foto. */
 export function ProductCard({ product, eager }: { product: Card; eager?: boolean }) {
-  const [color, setColor] = useState(product.colors[0]?.name);
-  const href = `/producto/${product.slug}${color && color !== product.colors[0]?.name ? `?color=${encodeURIComponent(color)}` : ""}`;
+  const first = product.colors[0]?.name;
+  const own = product.images.filter((i) => !first || i.color === first || i.color === "");
+  const list = own.length ? own : product.images;
+  const main = list[0]?.url;
+  const alt = list[1]?.url;
   const soldOut = product.stock <= 0;
-  const urls = product.colors.length
-    ? product.colors.map((c) => ({ key: c.name, url: imageFor(product.images, c.name) }))
-    : [{ key: "", url: imageFor(product.images) }];
-  const active = color ?? "";
 
   return (
     <article className="group relative">
-      <Link href={href} className="block rounded-card" aria-label={product.name}>
-        <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-mist">
-          {urls.map(
-            (u) =>
-              u.url && (
-                <img
-                  key={u.key}
-                  src={u.url}
-                  alt={u.key === active ? product.name : ""}
-                  loading={eager ? "eager" : "lazy"}
-                  decoding="async"
-                  className={cx(
-                    "absolute inset-0 size-full object-cover transition-[opacity,transform] duration-500 ease-apple group-hover:scale-[1.045]",
-                    u.key === active ? "opacity-100" : "opacity-0",
-                    soldOut && "grayscale-[0.4]",
-                  )}
-                />
-              ),
+      <Link href={`/producto/${product.slug}`} className="block" aria-label={product.name}>
+        <div className="relative aspect-[4/5] overflow-hidden bg-tile">
+          {main && (
+            <img
+              src={main}
+              alt={product.name}
+              loading={eager ? "eager" : "lazy"}
+              decoding="async"
+              className={cx(
+                "absolute inset-0 size-full object-cover transition-opacity duration-500",
+                alt && "group-hover:opacity-0",
+                soldOut && "opacity-60",
+              )}
+            />
+          )}
+          {alt && (
+            <img
+              src={alt}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            />
           )}
           {(product.isNew || soldOut) && (
-            <span
-              className={cx(
-                "absolute left-5 top-5 text-[13px] font-medium",
-                soldOut ? "text-ink-2" : "text-[#b4530a]",
-              )}
-            >
+            <span className="caps absolute left-3 top-3 !text-[10px] sm:left-4 sm:top-4">
               {soldOut ? "Agotado" : "Nuevo"}
             </span>
           )}
         </div>
-      </Link>
-      <div className="flex flex-col gap-2 px-1.5 pt-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-        <div className="min-w-0">
-          <h3 className="truncate text-[17px] font-semibold tracking-[-0.02em]">
-            <Link href={href}>{product.name}</Link>
-          </h3>
-          <Price price={product.price} compareAt={product.compareAtPrice} className="mt-0.5 text-[15px] text-ink-2" />
+        <div className="flex items-start justify-between gap-3 pt-3">
+          <h3 className="caps min-w-0 !text-[11px] sm:!text-[12px]">{product.name}</h3>
+          <Price price={product.price} compareAt={product.compareAtPrice} className="shrink-0 text-[12px] sm:text-[13px]" />
         </div>
         {product.colors.length > 1 && (
-          <div className="-ml-[3px] flex shrink-0 items-center gap-0.5 sm:ml-0 sm:pt-1">
-            {product.colors.slice(0, 5).map((c) => (
-              <Swatch key={c.name} hex={c.hex} name={c.name} selected={c.name === color} onSelect={() => setColor(c.name)} />
-            ))}
-          </div>
+          <p className="mt-1 text-[12px] text-ink-3">{product.colors.length} colores</p>
         )}
-      </div>
+      </Link>
     </article>
   );
 }
 
 export function ProductGrid({ products }: { products: Card[] }) {
   return (
-    <div className="grid grid-cols-2 gap-x-3 gap-y-9 sm:gap-x-5 md:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-2 gap-y-10 sm:gap-x-3 lg:grid-cols-4">
       {products.map((p, i) => (
         <ProductCard key={p.id} product={p} eager={i < 4} />
       ))}

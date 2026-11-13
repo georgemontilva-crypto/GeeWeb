@@ -95,11 +95,19 @@ function StoreForm({ initial }: { initial: StoreSettings }) {
             </Field>
             <ImageInput
               label="Logo"
-              hint="Si no subes logo, se muestra el nombre de la tienda."
+              hint="Para fondo claro. Si no subes logo, se muestra el nombre de la tienda en letras espaciadas."
               fit="contain"
               value={s.logoUrl}
               onChange={(url) => set({ logoUrl: url })}
               className="aspect-[2/1] max-w-[280px]"
+            />
+            <ImageInput
+              label="Logo para modo oscuro"
+              hint="Opcional. Versión clara del logo. Si no la subes, se usa el logo normal invertido."
+              fit="contain"
+              value={s.logoDarkUrl}
+              onChange={(url) => set({ logoDarkUrl: url })}
+              className="aspect-[2/1] max-w-[280px] !bg-[#111]"
             />
             <ImageInput
               label="Ícono de la pestaña"
@@ -109,7 +117,7 @@ function StoreForm({ initial }: { initial: StoreSettings }) {
               onChange={(url) => set({ faviconUrl: url })}
               className="aspect-square max-w-[140px]"
             />
-            <Field label="Color de acento" error={errors.accent} hint="Color de los botones principales.">
+            <Field label="Color de acento" error={errors.accent} hint="Color de los botones principales. Déjalo negro para el estilo de la tienda: en modo oscuro se vuelve blanco solo.">
               <span className="flex items-center gap-2.5">
                 <input
                   type="color"

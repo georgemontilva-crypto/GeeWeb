@@ -116,6 +116,7 @@ export const settingsSchema = z.object({
     heroTitle: z.string().max(80),
     heroSubtitle: z.string().max(200),
     heroImageUrl: z.string().max(600),
+    heroImage2Url: z.string().max(600),
     heroProductId: z.number().int().nullable(),
     heroCtaLabel: z.string().max(40),
     heroCtaHref: z.string().max(400),
@@ -132,7 +133,7 @@ export const settingsSchema = z.object({
 export type Settings = z.infer<typeof settingsSchema>;
 
 export const DEFAULT_SETTINGS: Settings = {
-  storeName: "Gee",
+  storeName: "THEARTOFGEE",
   tagline: "Ropa esencial, hecha para durar.",
   logoUrl: "",
   logoDarkUrl: "",
@@ -156,12 +157,13 @@ export const DEFAULT_SETTINGS: Settings = {
   lowStock: 3,
 
   home: {
-    heroTitle: "Menos ruido. Mejor ropa.",
+    heroTitle: "Nueva colección",
     heroSubtitle:
       "Piezas esenciales en algodón pesado, cortes limpios y colores que combinan entre sí.",
     heroImageUrl: "",
+    heroImage2Url: "",
     heroProductId: null,
-    heroCtaLabel: "Ver la colección",
+    heroCtaLabel: "Comprar ahora",
     heroCtaHref: "/tienda",
     showcaseProductId: null,
     showcaseTitle: "Un corte. Todos tus colores.",

@@ -79,40 +79,34 @@ function Form({ initial }: { initial: Settings }) {
                 onChange={(e) => setHome({ heroCtaHref: e.target.value })}
               />
             </Field>
-            <Field label="Producto que se muestra" className="sm:col-span-2">
+            <Field label="Producto de la izquierda" hint="Se usa mientras no subas fotos de portada.">
               <Select value={home.heroProductId ?? ""} onChange={(e) => setHome({ heroProductId: toId(e.target.value) })}>
                 <option value="">Automático (primer destacado)</option>
                 {goneOption(home.heroProductId)}
                 {productOptions}
               </Select>
             </Field>
-            <div className="sm:col-span-2">
-              <ImageInput
-                label="Foto de portada"
-                hint="Opcional. Si subes una foto, ocupa toda la portada en lugar del producto."
-                value={home.heroImageUrl}
-                onChange={(url) => setHome({ heroImageUrl: url })}
-                className="aspect-[16/9] max-w-[520px]"
-              />
-            </div>
-          </div>
-        </Card>
-
-        <Card title="Vitrina de colores" description="Un producto que el cliente puede ver cambiar de color.">
-          <div className="grid gap-4">
-            <Field label="Producto">
+            <Field label="Producto de la derecha" hint="Se usa mientras no subas fotos de portada.">
               <Select value={home.showcaseProductId ?? ""} onChange={(e) => setHome({ showcaseProductId: toId(e.target.value) })}>
-                <option value="">Automático</option>
+                <option value="">Automático (segundo destacado)</option>
                 {goneOption(home.showcaseProductId)}
                 {productOptions}
               </Select>
             </Field>
-            <Field label="Título">
-              <Input value={home.showcaseTitle} maxLength={120} onChange={(e) => setHome({ showcaseTitle: e.target.value })} />
-            </Field>
-            <Field label="Texto" optional>
-              <Textarea value={home.showcaseText} rows={3} maxLength={400} onChange={(e) => setHome({ showcaseText: e.target.value })} />
-            </Field>
+            <ImageInput
+              label="Foto de portada"
+              hint="Ocupa toda la pantalla. Si subes también la segunda, se muestran lado a lado."
+              value={home.heroImageUrl}
+              onChange={(url) => setHome({ heroImageUrl: url })}
+              className="aspect-[4/5] max-w-[260px]"
+            />
+            <ImageInput
+              label="Segunda foto de portada"
+              hint="Opcional. En celulares se muestra solo la primera."
+              value={home.heroImage2Url}
+              onChange={(url) => setHome({ heroImage2Url: url })}
+              className="aspect-[4/5] max-w-[260px]"
+            />
           </div>
         </Card>
 

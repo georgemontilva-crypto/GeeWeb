@@ -26,7 +26,7 @@ function Steps({ status }: { status: OrderStatus }) {
         const done = i <= current;
         return (
           <li key={s} aria-current={i === current ? "step" : undefined}>
-            <div className={cx("h-1.5 rounded-full transition-colors", done ? "bg-ink" : "bg-mist-2")} />
+            <div className={cx("h-px transition-colors", done ? "bg-ink" : "bg-line")} />
             <p className={cx("mt-3 text-[12px] leading-tight sm:text-[14px]", done ? "font-medium text-ink" : "text-ink-3")}>
               {STEP_SHORT[s]}
             </p>
@@ -55,7 +55,7 @@ export default function Order() {
   const o = q.data;
   if (!o) {
     return (
-      <div className="wrap pt-[160px]">
+      <div className="wrap pt-14">
         <EmptyState title="No encontramos ese pedido" text="Revisa el enlace o búscalo con tu número de pedido y tu correo.">
           <ButtonLink href="/seguimiento">Buscar mi pedido</ButtonLink>
         </EmptyState>
@@ -84,17 +84,17 @@ export default function Order() {
   };
 
   return (
-    <div className="wrap max-w-[1040px] pt-[116px]">
+    <div className="wrap max-w-[1040px] pt-14">
       <header>
         <p className="text-[17px] text-ink-2">Pedido {o.number}</p>
-        <h1 className="headline mt-2 text-[clamp(2.4rem,6vw,4.5rem)]">
+        <h1 className="headline mt-2 text-[clamp(1.75rem,3.4vw,2.6rem)]">
           {cancelled
             ? "Este pedido fue cancelado."
             : isNew
               ? `Gracias, ${firstName}.`
               : ORDER_STATUS_LABEL[o.status] + "."}
         </h1>
-        <p className="mt-4 max-w-[56ch] text-[19px] text-ink-2">
+        <p className="mt-4 max-w-[56ch] text-[15px] text-ink-2">
           {cancelled
             ? "Si crees que es un error, escríbenos con tu número de pedido."
             : isNew
@@ -112,15 +112,15 @@ export default function Order() {
       <div className="mt-12 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-5">
           {pending && (
-            <section className="rounded-card bg-mist p-6 sm:p-8" aria-labelledby="pago">
-              <h2 id="pago" className="text-[24px] tracking-[-0.03em]">
+            <section className=" border border-line p-6 sm:p-8" aria-labelledby="pago">
+              <h2 id="pago" className="caps">
                 {o.paymentRequiresProof ? "Paga y sube tu comprobante" : "Cómo vas a pagar"}
               </h2>
               <p className="mt-2 text-[16px] text-ink-2">
-                {o.paymentMethod}. Total a pagar: <strong className="font-semibold text-ink">{money(o.total)}</strong>
+                {o.paymentMethod}. Total a pagar: <strong className="font-medium text-ink">{money(o.total)}</strong>
               </p>
               {o.paymentInstructions && (
-                <p className="mt-5 whitespace-pre-line rounded-[18px] bg-white p-5 text-[15px] leading-relaxed">
+                <p className="mt-5 whitespace-pre-line bg-paper p-5 text-[15px] leading-relaxed">
                   {o.paymentInstructions}
                 </p>
               )}
@@ -176,12 +176,12 @@ export default function Order() {
           )}
 
           {o.trackingNumber && (
-            <section className="rounded-card bg-mist p-6 sm:p-8" aria-labelledby="guia">
-              <h2 id="guia" className="text-[24px] tracking-[-0.03em]">
+            <section className=" border border-line p-6 sm:p-8" aria-labelledby="guia">
+              <h2 id="guia" className="caps">
                 Tu envío
               </h2>
               <p className="mt-2 text-[16px] text-ink-2">
-                {o.shippingMethod}. Número de guía: <strong className="font-semibold text-ink">{o.trackingNumber}</strong>
+                {o.shippingMethod}. Número de guía: <strong className="font-medium text-ink">{o.trackingNumber}</strong>
               </p>
               {o.trackingUrl && (
                 <div className="mt-5">
@@ -193,18 +193,18 @@ export default function Order() {
             </section>
           )}
 
-          <section className="rounded-card p-6 shadow-[inset_0_0_0_1px_var(--color-mist-2)] sm:p-8" aria-labelledby="articulos">
-            <h2 id="articulos" className="text-[24px] tracking-[-0.03em]">
+          <section className=" p-6 border border-line sm:p-8" aria-labelledby="articulos">
+            <h2 id="articulos" className="caps">
               Lo que pediste
             </h2>
             <ul className="mt-3 divide-y divide-mist-2">
               {o.items.map((i, n) => (
                 <li key={n} className="flex items-center gap-4 py-4">
-                  <span className="h-[84px] w-[68px] shrink-0 overflow-hidden rounded-[16px] bg-mist">
+                  <span className="h-[84px] w-[68px] shrink-0 overflow-hidden bg-tile">
                     {i.imageUrl && <img src={i.imageUrl} alt="" className="size-full object-cover" />}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[16px] font-semibold tracking-[-0.02em]">{i.name}</span>
+                    <span className="caps block truncate !text-[11px]">{i.name}</span>
                     <span className="block text-[14px] text-ink-2">
                       {[i.color, i.size].filter(Boolean).join(", ")}
                       {i.color || i.size ? ". " : ""}Cantidad: {i.quantity}
@@ -230,16 +230,16 @@ export default function Order() {
                 <dd className="tabular-nums">{o.shippingCost === 0 ? "Gratis" : money(o.shippingCost)}</dd>
               </div>
               <div className="flex items-baseline justify-between pt-2">
-                <dt className="text-[17px] font-semibold">Total</dt>
-                <dd className="text-[24px] font-semibold tracking-[-0.03em] tabular-nums">{money(o.total)}</dd>
+                <dt className="text-[17px] font-medium">Total</dt>
+                <dd className="text-[18px] tabular-nums">{money(o.total)}</dd>
               </div>
             </dl>
           </section>
         </div>
 
         <aside className="space-y-5">
-          <section className="rounded-card bg-mist p-6">
-            <h2 className="text-[19px] tracking-[-0.02em]">Entrega</h2>
+          <section className=" border border-line p-6">
+            <h2 className="caps">Entrega</h2>
             <p className="mt-2 text-[15px] leading-relaxed text-ink-2">
               {o.customerName}
               <br />
@@ -256,8 +256,8 @@ export default function Order() {
             </p>
           </section>
 
-          <section className="rounded-card bg-mist p-6">
-            <h2 className="text-[19px] tracking-[-0.02em]">Historial</h2>
+          <section className=" border border-line p-6">
+            <h2 className="caps">Historial</h2>
             <ol className="mt-3 space-y-3.5">
               {[...o.events].reverse().map((e, i) => (
                 <li key={i} className="text-[15px] leading-snug">

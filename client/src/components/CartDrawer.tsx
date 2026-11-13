@@ -20,11 +20,11 @@ export function QuantityStepper({
   small?: boolean;
 }) {
   const b = cx(
-    "grid place-items-center rounded-full text-ink transition-colors hover:bg-mist-2 disabled:opacity-30",
+    "grid place-items-center text-ink transition-colors hover:bg-mist disabled:opacity-30",
     small ? "size-7" : "size-9",
   );
   return (
-    <div className={cx("inline-flex items-center rounded-full bg-mist", small ? "gap-1 p-0.5" : "gap-1.5 p-1")}>
+    <div className={cx("inline-flex items-center border border-line", small ? "gap-1 p-0.5" : "gap-1.5 p-1")}>
       <button type="button" className={b} aria-label="Quitar una unidad" onClick={() => onChange(value - 1)} disabled={value <= 1}>
         <Minus className="size-3.5" />
       </button>
@@ -52,17 +52,17 @@ export function CartLineRow({ row, compact }: { row: CartRow; compact?: boolean 
       <Link
         href={`/producto/${row.slug}`}
         onClick={() => cart.close()}
-        className={cx("shrink-0 overflow-hidden rounded-[18px] bg-mist", compact ? "h-[84px] w-[68px]" : "h-[112px] w-[90px]")}
+        className={cx("shrink-0 overflow-hidden bg-tile", compact ? "h-[95px] w-[76px]" : "h-[130px] w-[104px]")}
       >
         {row.imageUrl && <img src={row.imageUrl} alt="" className="size-full object-cover" />}
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-[16px] font-semibold tracking-[-0.02em]">{row.name}</p>
-            {variant && <p className="text-[14px] text-ink-2">{variant}</p>}
+            <p className="caps truncate !text-[11px]">{row.name}</p>
+            {variant && <p className="mt-1 text-[13px] text-ink-2">{variant}</p>}
           </div>
-          <p className="shrink-0 text-[15px] tabular-nums">{money(row.price * row.quantity)}</p>
+          <p className="shrink-0 text-[13px] tabular-nums">{money(row.price * row.quantity)}</p>
         </div>
         {row.problem && (
           <p className="mt-1 text-[13px] text-bad">
@@ -79,7 +79,7 @@ export function CartLineRow({ row, compact }: { row: CartRow; compact?: boolean 
           <button
             type="button"
             onClick={() => cart.remove(row.variantId)}
-            className="text-[14px] text-ink-2 underline-offset-4 hover:text-ink hover:underline"
+            className="link text-[12px] text-ink-2"
           >
             Quitar
           </button>
@@ -122,7 +122,7 @@ export function CartDrawer() {
       {open && (
         <div className="fixed inset-0 z-[70]">
           <motion.div
-            className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-black/40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -134,18 +134,18 @@ export function CartDrawer() {
             role="dialog"
             aria-modal="true"
             aria-label="Tu bolsa"
-            className="absolute inset-y-0 right-0 flex w-full max-w-[460px] flex-col bg-white shadow-sheet sm:inset-y-3 sm:right-3 sm:rounded-[32px]"
+            className="absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col border-l border-line bg-paper"
             initial={{ x: "104%" }}
             animate={{ x: 0 }}
             exit={{ x: "104%" }}
             transition={{ duration: 0.45, ease: [0.28, 0.11, 0.32, 1] }}
           >
-            <header className="flex items-center justify-between px-6 pb-2 pt-5">
-              <h2 className="text-[24px]">
-                Tu bolsa{count > 0 && <span className="ml-2 text-ink-3">{count}</span>}
+            <header className="flex h-16 items-center justify-between border-b border-line px-6 sm:h-[76px]">
+              <h2 className="caps">
+                Tu bolsa{count > 0 && <span className="ml-2 text-ink-3">({count})</span>}
               </h2>
               <IconButton label="Cerrar la bolsa" onClick={() => cart.close()} className="-mr-2">
-                <X className="size-5" />
+                <X className="size-5" strokeWidth={1.2} />
               </IconButton>
             </header>
 
@@ -155,8 +155,8 @@ export function CartDrawer() {
               </div>
             ) : rows.length === 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-                <p className="text-[21px] font-semibold tracking-[-0.02em]">Tu bolsa está vacía</p>
-                <p className="mt-2 text-[15px] text-ink-2">Agrega algo que te guste y lo verás aquí.</p>
+                <p className="caps">Tu bolsa está vacía</p>
+                <p className="mt-2 text-[14px] text-ink-2">Agrega algo que te guste y lo verás aquí.</p>
                 <Button
                   className="mt-6"
                   onClick={() => {
@@ -170,38 +170,38 @@ export function CartDrawer() {
             ) : (
               <>
                 {free && (
-                  <div className="mx-6 mt-2 rounded-[18px] bg-mist px-4 py-3">
-                    <p className="text-[14px]">
+                  <div className="mx-6 mt-5 border border-line px-4 py-3">
+                    <p className="text-[13px]">
                       {free.missing > 0 ? (
                         <>
-                          Te faltan <strong className="font-semibold">{money(free.missing)}</strong> para el envío gratis.
+                          Te faltan <strong className="font-medium">{money(free.missing)}</strong> para el envío gratis.
                         </>
                       ) : (
-                        <strong className="font-semibold">Tienes envío gratis.</strong>
+                        <strong className="font-medium">Tienes envío gratis.</strong>
                       )}
                     </p>
-                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-mist-2">
+                    <div className="mt-2 h-px overflow-hidden bg-line">
                       <div
-                        className="h-full rounded-full bg-ink transition-[width] duration-500 ease-apple"
+                        className="h-full bg-ink transition-[width] duration-500 ease-apple"
                         style={{ width: `${free.progress * 100}%` }}
                       />
                     </div>
                   </div>
                 )}
-                <ul className="min-h-0 flex-1 divide-y divide-mist-2 overflow-y-auto px-6">
+                <ul className="min-h-0 flex-1 divide-y divide-line overflow-y-auto px-6">
                   {rows.map((r) => (
                     <CartLineRow key={r.variantId} row={r} />
                   ))}
                 </ul>
-                <footer className="border-t border-mist-2 px-6 pb-6 pt-4">
+                <footer className="border-t border-line px-6 pb-6 pt-5">
                   <div className="flex items-baseline justify-between">
-                    <span className="text-[15px] text-ink-2">Subtotal</span>
-                    <span className="text-[21px] font-semibold tracking-[-0.02em] tabular-nums">{money(subtotal)}</span>
+                    <span className="caps">Subtotal</span>
+                    <span className="text-[15px] tabular-nums">{money(subtotal)}</span>
                   </div>
-                  <p className="mt-0.5 text-[13px] text-ink-2">El envío se calcula en el siguiente paso.</p>
+                  <p className="mt-1 text-[12px] text-ink-3">El envío se calcula en el siguiente paso.</p>
                   <Button
                     size="lg"
-                    className="mt-4 w-full"
+                    className="caps mt-5 h-14 w-full !text-[12px]"
                     disabled={hasProblems}
                     onClick={() => {
                       cart.close();

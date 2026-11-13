@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import { useShop } from "./lib/shop";
+import { setForceLight } from "./lib/theme";
 import { Spinner } from "./components/ui";
 import { StoreLayout } from "./components/StoreLayout";
 import Home from "./pages/Home";
@@ -30,8 +31,10 @@ const Loading = () => (
 export default function App() {
   const shop = useShop();
   const [path] = useLocation();
+  const isAdmin = path.startsWith("/admin");
+  useEffect(() => setForceLight(isAdmin), [isAdmin]);
 
-  if (path.startsWith("/admin")) {
+  if (isAdmin) {
     return (
       <Suspense fallback={<Loading />}>
         <AdminApp />

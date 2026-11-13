@@ -28,10 +28,10 @@ export default function Track() {
   };
 
   return (
-    <div className="wrap pt-[124px]">
+    <div className="wrap pt-14">
       <div className="mx-auto max-w-[520px]">
-        <h1 className="headline text-[clamp(2.4rem,6vw,4rem)]">Sigue tu pedido.</h1>
-        <p className="mt-4 text-[19px] text-ink-2">
+        <h1 className="headline text-[clamp(1.75rem,3.4vw,2.6rem)]">Sigue tu pedido.</h1>
+        <p className="mt-4 text-[15px] text-ink-2">
           Escribe el número que te enviamos por correo y el correo con el que compraste.
         </p>
         <form onSubmit={submit} noValidate className="mt-9 space-y-4">

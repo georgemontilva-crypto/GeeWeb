@@ -25,7 +25,7 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const VARIANT: Record<Variant, string> = {
-  primary: "bg-accent text-white hover:opacity-85 active:opacity-75",
+  primary: "bg-accent text-on-accent hover:opacity-85 active:opacity-75",
   secondary: "bg-mist text-ink hover:bg-mist-2",
   ghost: "text-ink hover:bg-mist",
   danger: "bg-bad/10 text-bad hover:bg-bad/15",
@@ -37,7 +37,7 @@ const SIZE: Record<Size, string> = {
 };
 const btn = (variant: Variant, size: Size, className?: string) =>
   cx(
-    "inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-medium tracking-[-0.01em] whitespace-nowrap",
+    "inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--r-btn)] font-medium tracking-[-0.01em] whitespace-nowrap",
     "transition-[opacity,background-color,transform] duration-200 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100",
     VARIANT[variant],
     SIZE[size],
@@ -119,7 +119,7 @@ export function Spinner({ className }: { className?: string }) {
 /* ───────────── Formularios ───────────── */
 
 const control =
-  "w-full rounded-ctl border border-line bg-white px-4 text-[16px] text-ink placeholder:text-ink-3 transition-[border-color,box-shadow] duration-150 hover:border-ink-3 focus:border-ink focus:outline-none focus:ring-4 focus:ring-ink/8 disabled:bg-mist disabled:text-ink-3";
+  "w-full rounded-ctl border border-line bg-paper px-4 text-[16px] text-ink placeholder:text-ink-3 transition-[border-color,box-shadow] duration-150 hover:border-ink-3 focus:border-ink focus:outline-none focus:ring-4 focus:ring-ink/8 disabled:bg-mist disabled:text-ink-3";
 
 export function Field({
   label,
@@ -309,7 +309,7 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         className={cx(
-          "relative flex max-h-[92dvh] w-full animate-[rise-in_0.28s_var(--ease-apple)] flex-col overflow-hidden bg-white shadow-sheet",
+          "relative flex max-h-[92dvh] w-full animate-[rise-in_0.28s_var(--ease-apple)] flex-col overflow-hidden bg-paper shadow-sheet",
           "rounded-t-[28px] sm:rounded-[28px]",
           size === "sm" && "sm:max-w-[420px]",
           size === "md" && "sm:max-w-[560px]",
@@ -395,8 +395,8 @@ export function ToastHost() {
           <div
             key={t.id}
             className={cx(
-              "pointer-events-auto flex max-w-[92vw] animate-[rise-in_0.3s_var(--ease-apple)] items-center gap-2.5 rounded-full px-5 py-3 text-[15px] font-medium text-white shadow-float",
-              t.kind === "error" ? "bg-bad" : "bg-ink",
+              "pointer-events-auto flex max-w-[92vw] animate-[rise-in_0.3s_var(--ease-apple)] items-center gap-2.5 rounded-[var(--r-btn)] px-5 py-3 text-[15px] font-medium shadow-float",
+              t.kind === "error" ? "bg-bad text-white" : "bg-ink text-paper",
             )}
           >
             {t.kind === "ok" && <Check className="size-4" aria-hidden />}

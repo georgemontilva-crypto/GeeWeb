@@ -71,6 +71,7 @@ La tienda queda en `http://localhost:3000` y el panel en `http://localhost:3000/
 - **Inventario:** cada combinación de color y talla tiene sus propias unidades. Se descuentan al crear el pedido y se devuelven si el pedido se cancela.
 - **Pagos:** son manuales. El cliente ve los datos de pago al terminar, sube su comprobante desde la página del pedido y tú confirmas el pago en el panel.
 - **Subpáginas:** se crean en **Páginas** con bloques (texto, imagen, imagen con texto, preguntas frecuentes, llamado con botón). Cada una tiene su dirección (`/nosotros`, `/envios-y-cambios`…) y puede mostrarse en el menú o en el pie.
-- **Logo:** mientras no subas uno en **Ajustes → Marca**, se muestra el nombre de la tienda.
+- **Logo:** mientras no subas uno en **Ajustes → Marca**, se muestra el nombre de la tienda como logotipo en texto (Helvetica Neue Regular, 22 px, 5.5 px de espacio entre letras), que cambia solo entre negro y blanco. En `client/public/brand/` están las versiones del logo en PNG negro y blanco.
+- **Modo claro y oscuro:** la tienda sigue el modo del dispositivo y el cliente puede cambiarlo con el botón de la luna o el sol. El panel `/admin` siempre va en claro.
 - **Fotos de producto:** se ven mejor en proporción 4:5 con fondo claro o transparente. Asigna cada foto a su color para que cambie al elegirlo.
 - **Imágenes de ejemplo:** están en `client/public/demo`. Puedes borrar esa carpeta cuando ya no uses los productos de muestra.

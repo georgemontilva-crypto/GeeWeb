@@ -11,7 +11,18 @@ export function useShop() {
   const q = trpc.store.bootstrap.useQuery(undefined, { staleTime: 5 * 60_000 });
   const accent = q.data?.settings.accent;
   useEffect(() => {
-    if (accent) document.documentElement.style.setProperty("--accent", accent);
+    // Un acento negro (el de fábrica) sigue al tema: negro en claro y blanco
+    // en oscuro. Cualquier otro color se respeta en los dos modos.
+    const root = document.documentElement.style;
+    const m = accent?.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    const lum = m ? (0.2126 * parseInt(m[1]!, 16) + 0.7152 * parseInt(m[2]!, 16) + 0.0722 * parseInt(m[3]!, 16)) / 255 : 0;
+    if (!m || lum < 0.16) {
+      root.removeProperty("--accent");
+      root.removeProperty("--on-accent");
+    } else {
+      root.setProperty("--accent", accent!);
+      root.setProperty("--on-accent", lum > 0.6 ? "#121212" : "#ffffff");
+    }
   }, [accent]);
   return q.data;
 }
