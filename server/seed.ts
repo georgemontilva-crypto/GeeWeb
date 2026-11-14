@@ -3,7 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { DEFAULT_SETTINGS, slugify, type Block, type ProductColor } from "../shared/types";
 import { db, schema } from "./db";
 import { env } from "./env";
-import { saveSettings } from "./settings";
+import { getSettings, saveSettings } from "./settings";
 import { DEMO_HERO, insertDemoCatalog, refreshDemoCatalog } from "./demoCatalog";
 
 const text = (title: string, body: string): Block => ({ type: "texto", title, body, align: "izquierda" });
@@ -128,11 +128,31 @@ export async function ensureAdmin() {
   console.log(`✓ Usuario administrador creado: ${env.adminEmail}`);
 }
 
+/**
+ * Tiendas creadas antes de tener el logo: cambia el nombre provisional "Gee"
+ * por THEARTOFGEE y pone el logo en imagen (negro y blanco). Corre una vez y
+ * no toca un logo que ya hayan subido desde el panel.
+ */
+async function applyBrand() {
+  const FLAG = "brand-v1";
+  const [done] = await db.select().from(schema.settings).where(eq(schema.settings.key, FLAG)).limit(1);
+  if (done) return;
+  const s = await getSettings();
+  await saveSettings({
+    ...s,
+    storeName: s.storeName === "Gee" ? DEFAULT_SETTINGS.storeName : s.storeName,
+    logoUrl: s.logoUrl || DEFAULT_SETTINGS.logoUrl,
+    logoDarkUrl: s.logoDarkUrl || (s.logoUrl ? "" : DEFAULT_SETTINGS.logoDarkUrl),
+  });
+  await db.insert(schema.settings).values({ key: FLAG, value: new Date().toISOString() });
+}
+
 export async function seed() {
   await ensureAdmin();
 
   const [done] = await db.select().from(schema.settings).where(eq(schema.settings.key, "seeded")).limit(1);
   if (done) {
+    await applyBrand();
     if (env.seedDemo) await refreshDemoCatalog();
     return;
   }
@@ -180,7 +200,10 @@ export async function seed() {
     await insertDemoCatalog();
     await saveSettings({ ...DEFAULT_SETTINGS, home: { ...DEFAULT_SETTINGS.home, heroImageUrl: DEMO_HERO[0]!, heroImage2Url: DEMO_HERO[1]! } });
   }
-  await db.insert(schema.settings).values({ key: "demo-photos-v1", value: new Date().toISOString() });
+  await db.insert(schema.settings).values([
+    { key: "demo-photos-v1", value: new Date().toISOString() },
+    { key: "brand-v1", value: new Date().toISOString() },
+  ]);
 
   await db.insert(schema.settings).values({ key: "seeded", value: new Date().toISOString() });
 }

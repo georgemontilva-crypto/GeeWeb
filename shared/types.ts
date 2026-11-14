@@ -135,8 +135,8 @@ export type Settings = z.infer<typeof settingsSchema>;
 export const DEFAULT_SETTINGS: Settings = {
   storeName: "THEARTOFGEE",
   tagline: "Ropa esencial, hecha para durar.",
-  logoUrl: "",
-  logoDarkUrl: "",
+  logoUrl: "/brand/logo-negro.svg",
+  logoDarkUrl: "/brand/logo-blanco.svg",
   faviconUrl: "",
   accent: "#1d1d1f",
   announcement: "Envío gratis en compras desde $120",

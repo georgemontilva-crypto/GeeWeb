@@ -25,7 +25,7 @@ export function Brand({ className, size = "md" }: { className?: string; size?: "
           alt={storeName}
           className={cx(
             "w-auto object-contain",
-            size === "md" ? "h-6 max-w-[220px] sm:h-7" : "h-5 max-w-[180px]",
+            size === "md" ? "h-[14px] max-w-[60vw] sm:h-[20px]" : "h-[14px]",
             theme === "dark" && !logoDarkUrl && "invert",
           )}
         />
