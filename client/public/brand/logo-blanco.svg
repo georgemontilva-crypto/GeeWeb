@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="36 36 2824 240" width="2824" height="240" role="img" aria-label="THEARTOFGEE"><g transform="translate(0.000000,312.000000) scale(0.100000,-0.100000)"
-fill="#ffffff" stroke="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-664 -240 4296 784" width="4296" height="784" role="img" aria-label="THEARTOFGEE"><rect x="-664" y="-240" width="4296" height="784" fill="#ffffff"/><g transform="translate(0.000000,312.000000) scale(0.100000,-0.100000)"
+fill="#000000" stroke="none">
 <path d="M22433 2644 c-60 -8 -113 -24 -150 -42 -32 -16 -76 -35 -98 -42 -22
 -7 -53 -23 -70 -35 -16 -13 -46 -30 -65 -40 -54 -27 -268 -249 -292 -303 -12
 -26 -31 -60 -43 -77 -13 -16 -28 -48 -35 -70 -7 -22 -25 -69 -41 -105 -72
@@ -116,5 +116,4 @@ fill="#ffffff" stroke="none">
 17 -45 18 -545 17 -528 -2 -531 -2 -552 19 -20 20 -21 29 -18 200 3 167 4 181
 24 201 21 21 25 21 553 19 l532 -1 35 35 34 34 0 142 0 142 -34 34 -34 34
 -742 0 -742 0 -34 -34z"/>
-</g>
-</svg>
+</g></svg>
